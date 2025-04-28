@@ -18,6 +18,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         user = self.create_user(email, password, **extra_fields)
         return user
+    
 class User(AbstractUser,PermissionsMixin):
     ROLE_CHOICES = [
         ('client', 'Клиент'),
@@ -67,4 +68,22 @@ class RepairRequest(models.Model):
     feedback = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"№{self.number} - {self.client_name.name}"
+        return f"№{self.number} - {self.client.name}"
+
+class Comment(models.Model):
+    repair_request = models.ForeignKey(RepairRequest, on_delete=models.CASCADE)
+    autor = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'комментарии от {self.autor} к заявке № {self.repair_request.number}'
+
+class RequestLog(models.Model):
+    repair_request = models.ForeignKey(RepairRequest, on_delete=models.CASCADE)
+    changed_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    changed_at = models.DateTimeField(auto_now_add=True)
+    change_description = models.TextField()
+
+    def __str__(self):
+        return f'изменение заявки № {self.repair_request.number} от {self.changed_by.name}'

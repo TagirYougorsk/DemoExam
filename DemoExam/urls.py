@@ -21,10 +21,11 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from DemoExam import settings
+from app.views import register_page
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
+    path('register/', register_page, name='register_page'),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/", include("app.urls")),

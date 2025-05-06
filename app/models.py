@@ -56,6 +56,24 @@ class RepairRequest(models.Model):
         ('completed', 'Выполнено'),
     ]
 
+    @property
+    def is_client(self):
+        return self.role == 'client'
+
+    @property
+    def is_executor(self):
+        return self.role == 'executor'
+
+    def get_full_info(self):
+        """Метод для получения полной информации о пользователе"""
+        return {
+            'id': self.id,
+            'email': self.email,
+            'name': self.name,
+            'role': self.role,
+            'phone': self.phone
+        }
+
     number = models.CharField(max_length=20, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)

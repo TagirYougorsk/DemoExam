@@ -23,6 +23,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from DemoExam import settings
 from app.views import register_page
 
+from django.contrib.auth.views import LoginView
+from app.views import register_page
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', register_page, name='register_page'),
@@ -32,6 +35,9 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+
+    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+    path('register/', register_page, name='register_page'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

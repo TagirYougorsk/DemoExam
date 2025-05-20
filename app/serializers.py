@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from app.models import User
-
+from .models import RepairRequest, Equipment
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
@@ -43,3 +43,28 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'name', 'phone', 'role']
+
+
+class EquipmentShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Equipment
+        fields = [ 'id', 'name', 'serial_number' ]
+
+
+class RepairRequestSerializer(serializers.ModelSerializer):
+    equipment = EquipmentShortSerializer(read_only=True)
+    equipment_id = serializers.PrimaryKeyRelatedField(
+        queryset=Equipment.objects.all(),
+        source='equipment',
+        write_only=True
+    )
+
+    class Meta:
+        model = RepairRequest
+        fields = '__all__'
+        read_only_fields = ('number', 'created_at', 'client', 'status')
+
+    def create(self, validated_data):
+        # Автоматически назначаем текущего пользователя как клиента
+        validated_data[ 'client' ] = self.context[ 'request' ].user
+        return super().create(validated_data)

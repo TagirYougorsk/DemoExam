@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from rest_framework import generics, permissions, status
+from rest_framework.decorators import action
+
 from app.models import User
 from app.serializers import RegistrationSerializer
 from django.contrib.auth import authenticate, login, logout
@@ -7,6 +9,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import *
+from rest_framework import viewsets, permissions
+from .models import RepairRequest
+from .serializers import RepairRequestSerializer
+from .filters import RepairRequestFilter
 
 
 
@@ -43,8 +49,10 @@ class RegistrationView(generics.CreateAPIView):
             "message": "Пользователь успешно зарегистрирован",
             "user": UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -58,3 +66,30 @@ class LogoutView(APIView):
     def post(self, request):
         # В реальном проекте нужно добавить логику отзыва токенов
         return Response({"message": "Успешный выход"}, status=status.HTTP_200_OK)
+
+class RepairRequestViewSet(viewsets.ModelViewSet):
+    queryset = RepairRequest.objects.all()
+    serializer_class = RepairRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filterset_class = RepairRequestFilter
+
+    def get_queryset(self):
+        # Фильтрация по ролям:
+        user = self.request.user
+        if user.is_executor:
+            return self.queryset.filter(assigned_to=user)
+        elif user.is_client:
+            return self.queryset.filter(client=user)
+        return self.queryset
+
+    @action(detail=True, methods=[ 'post' ])
+    def change_status(self, request, pk=None):
+        request_obj = self.get_object()
+        new_status = request.data.get('status')
+
+        if new_status not in dict(RepairRequest.STATUS_CHOICES):
+            return Response({"error": "Invalid status"}, status=400)
+
+        request_obj.status = new_status
+        request_obj.save()
+        return Response({"status": "updated"})

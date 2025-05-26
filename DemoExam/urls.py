@@ -24,7 +24,6 @@ from DemoExam import settings
 from app.views import register_page
 
 from django.contrib.auth.views import LoginView
-from app.views import register_page
 
 urlpatterns = [
     path('admin/', admin.site.urls),

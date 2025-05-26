@@ -4,12 +4,12 @@ from rest_framework.decorators import action
 
 from app.models import User
 from app.serializers import RegistrationSerializer
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import *
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from .models import RepairRequest
 from .serializers import RepairRequestSerializer
 from .filters import RepairRequestFilter
